@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['src\\mpl-theme-tweaker\\main.py'],
+    ['src\\mpl_theme_tweaker\\main.py'],
     pathex=[],
     binaries=[],
     datas=[],

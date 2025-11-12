@@ -11,6 +11,12 @@ _
 # pyinstaller
 build/
 dist/
+*.egg-info/
+*.spec
 
 # Python
 __pycache__/
+
+
+# Execute
+*.log
