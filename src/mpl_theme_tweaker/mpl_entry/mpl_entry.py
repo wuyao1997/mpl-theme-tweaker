@@ -23,7 +23,7 @@ class Entry(ABC):
         return
 
     def update_mpl_rcparams(self, value) -> None:
-        plt.rcParams[self.key] = self.value
+        plt.rcParams[self.key] = value
         self.value = value
 
         self.updated = True
@@ -38,6 +38,23 @@ class Entry(ABC):
 
     def reset_by_rcParams(self) -> None:
         self.value = plt.rcParams[self.key]
+        return
+
+
+class BoolEntry(Entry):
+    def __init__(
+        self, label: str, key: str, value: bool = False, sameline: bool = False
+    ):
+        super().__init__(label, key, sameline)
+        self.value = value
+
+    def gui(self) -> None:
+        super().gui()
+
+        changed, new_value = imgui.checkbox(self.label, self.value)
+        if changed:
+            if new_value != self.value:
+                self.update_mpl_rcparams(new_value)
         return
 
 
@@ -134,11 +151,79 @@ class FloatEntry(Entry):
 
 
 class Float2Entry(Entry):
-    pass
+    """
+    dict info should like:
+    {
+        "value": [0.0, 0.0],
+        "vmin": 0.0,
+        "vmax": 100.0,
+        "format": "%.3f",
+    }
+    """
+
+    def __init__(
+        self,
+        label: str,
+        key: str,
+        info: dict[str, Any],
+        sameline: bool = False,
+    ):
+        super().__init__(label, key, sameline)
+
+        self.value = info.get("value", 0.0)
+        self.vmin = info.get("vmin")
+        self.vmax = info.get("vmax")
+        self.format = info.get("format", "%.3f")
+
+    def gui(self) -> None:
+        super().gui()
+
+        changed, new_value = imgui.input_float2(self.label, self.value, self.format)
+        if changed:
+            if not (self.vmin is None or self.vmax is None):
+                new_value = max(self.vmin, min(new_value, self.vmax))
+
+            if new_value != self.value:
+                self.update_mpl_rcparams(new_value)
+        return
 
 
 class Float4Entry(Entry):
     pass
+
+
+class StrEntry(Entry):
+    """
+    dict info should like:
+    {
+        "value": 0,
+        "items": ["AA", "BB", "CC", "DD"],
+    }
+    """
+
+    def __init__(self, label: str, key: str, info: dict[str, Any]):
+        super().__init__(label, key)
+        self.value = info.get("value", 0)
+        self.items: list[str] = info.get("items", [])
+
+    def gui(self) -> None:
+        super().gui()
+
+        changed, new_value = imgui.combo(self.label, self.value, self.items)
+        if changed:
+            if new_value != self.value:
+                self.update_mpl_rcparams(new_value)
+        return
+
+    def update_mpl_rcparams(self, value) -> None:
+        self.value = value
+        plt.rcParams[self.key] = self.items[self.value]
+
+        self.updated = True
+        return
+
+    def reset_by_rcParams(self) -> None:
+        pass
 
 
 class ColorEntry(Entry):
@@ -176,6 +261,7 @@ class ColorEntry(Entry):
         return
 
     def reset_by_rcParams(self) -> None:
+        # pass, because value from rcParams may not a tuple
         # self.value = plt.rcParams[self.key]
-        print(f"{self.key}, {self.value}, {plt.rcParams[self.key]}")
+        # print(f"{self.key}, {self.value}, {plt.rcParams[self.key]}")
         return

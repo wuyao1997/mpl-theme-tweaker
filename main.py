@@ -91,7 +91,7 @@ class Application:
         awp = self.params.app_window_params
 
         awp.window_title = "mpl-theme-tweaker"
-        awp.window_geometry.size = (600, 900)
+        awp.window_geometry.size = (640, 960)
         awp.restore_previous_geometry = True
         awp.borderless = False
         awp.borderless_movable = True

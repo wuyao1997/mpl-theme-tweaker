@@ -28,11 +28,11 @@ def plot_colored_lines(ax):
     def sigmoid(t, t0):
         return 1 / (1 + np.exp(-(t - t0)))
 
-    nb_colors = len(plt.rcParams["axes.prop_cycle"])
+    nb_colors = min(len(plt.rcParams["axes.prop_cycle"]), 4)
     shifts = np.linspace(-5, 5, nb_colors)
     amplitudes = np.linspace(1, 1.5, nb_colors)
     for t0, a in zip(shifts, amplitudes):
-        ax.plot(t, a * sigmoid(t, t0), ls="-", label=f"$t_0$ = {t0:.1f}", markevery=10)
+        ax.plot(t, a * sigmoid(t, t0), label=f"$t_0$ = {t0:.1f}", markevery=10)
     ax.set_xlim(-10, 10)
     ax.legend(title="Legend title")
     return ax
@@ -43,8 +43,8 @@ def plot_bar_graphs(ax, prng, min_value=5, max_value=25, nb_samples=5):
     x = np.arange(nb_samples)
     ya, yb = prng.randint(min_value, max_value, size=(2, nb_samples))
     width = 0.25
-    ax.bar(x, ya, width)
-    ax.bar(x + width, yb, width, color="C2")
+    ax.bar(x, ya, width, hatch=r"//")
+    ax.bar(x + width, yb, width, color="C2", hatch=r"\\")
     ax.set_xticks(x + width, labels=["a", "b", "c", "d", "e"])
     return ax
 
@@ -79,8 +79,8 @@ def plot_colored_circles(ax, prng, nb_samples=15):
 def plot_image_and_patch(ax, prng, size=(20, 20)):
     """Plot an image with random values and superimpose a circular patch."""
     values = prng.random_sample(size=size)
-    ax.imshow(values, interpolation="none")
-    c = plt.Circle((5, 5), radius=5, label="patch")  # type: ignore
+    ax.imshow(values)
+    c = plt.Circle((5, 5), radius=5, label="patch", linewidth=2)  # type: ignore
     ax.add_patch(c)
     # Remove ticks
     ax.set_xticks([])
@@ -151,7 +151,7 @@ def plot_figure() -> Figure:
     plot_colored_circles(axs[5], prng)
 
     # add divider
-    rec = Rectangle((0.025, 12.5), 0.9, 1, clip_on=False, color="gray")
+    rec = Rectangle((0.025, 12.5), 0.9, 1, clip_on=False, linewidth=2)
 
     axs[4].add_artist(rec)
 

@@ -3,14 +3,36 @@ from typing import Callable
 from imgui_bundle import imgui
 import matplotlib.pyplot as plt
 
-from mpl_theme_tweaker.mpl_entry.section import AxesSection, FigureSection
+from mpl_theme_tweaker.mpl_entry.section import (
+    AxesSection,
+    BoxplotSection,
+    FigureSection,
+    ImageSection,
+    TextSection,
+    TicksSection,
+    FontSection,
+    LaTeXSection,
+    LegendSection,
+    LinesSection,
+)
 
 
 class ParamsWindow:
     def __init__(self, callback: Callable):
         self.callback: Callable = callback
 
-        self.sections = [FigureSection(), AxesSection()]
+        self.sections = [
+            FigureSection(),
+            AxesSection(),
+            TicksSection(),
+            LinesSection(),
+            LegendSection(),
+            TextSection(),
+            FontSection(),
+            LaTeXSection(),
+            BoxplotSection(),
+            ImageSection(),
+        ]
 
     def gui(self) -> None:
         if imgui.begin_tab_bar("RcParams"):
