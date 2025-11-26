@@ -132,7 +132,7 @@ class Application:
         hello_imgui.show_app_menu(self.params)
         hello_imgui.show_view_menu(self.params)
 
-        if imgui.begin_menu("Reset"):
+        if imgui.begin_menu("Reset Style"):
             clicked, _ = imgui.menu_item("Default", "", False)
             if clicked:
                 self.params_window.reset_by_default()

@@ -9,6 +9,7 @@ from mpl_theme_tweaker.opengl import (
     create_texture_from_image,
     rebind_texture_from_image,
 )
+from mpl_theme_tweaker._global import set_app_key
 
 
 class FigureWindow:
@@ -18,6 +19,7 @@ class FigureWindow:
         self.texture_id: int = None  # type: ignore
         self.replot_times: int = 0
         self.plot_flags = implot.Flags_.equal + implot.Flags_.no_legend
+        set_app_key("FigureWidow.replot_func", self.replot)
 
     def gui(self) -> None:
         if self.texture_id is None:

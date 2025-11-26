@@ -401,18 +401,18 @@ class AxesSection(Section):
         )
         xlabelloc = StrEntry(
             "x label location",
-            "axes.xlabelposition",
+            "xaxis.labellocation",
             {
                 "value": 1,
-                "items": ["top", "center", "bottom"],
+                "items": ["left", "center", "right"],
             },
         )
         ylabelloc = StrEntry(
             "y label location",
-            "axes.ylabelposition",
+            "yaxis.labellocation",
             {
                 "value": 1,
-                "items": ["left", "center", "right"],
+                "items": ["top", "center", "bottom"],
             },
         )
 
@@ -1179,7 +1179,7 @@ class BoxplotSection(Section):
                 "format": "%.3f",
             },
         )
-        flier_markersize = IntEntry(
+        flier_markersize = FloatEntry(
             "flier marker size",
             "boxplot.flierprops.markersize",
             {
@@ -1187,7 +1187,8 @@ class BoxplotSection(Section):
                 "vmin": 0,
                 "vmax": 20,
                 "step": 1,
-                "stepfast": 5,
+                "stepfast": 1,
+                "format": "%.3f",
             },
         )
         flier_linestyle = StrEntry(

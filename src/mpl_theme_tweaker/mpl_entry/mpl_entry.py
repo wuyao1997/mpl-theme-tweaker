@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Any
 
 import matplotlib.pyplot as plt
@@ -22,6 +22,8 @@ class Entry(ABC):
     def gui(self) -> None:
         if self.sameline:
             imgui.same_line()
+
+        # print(self)
         return
 
     def update_mpl_rcparams(self, value) -> None:
@@ -268,7 +270,14 @@ class StrEntry(Entry):
         return
 
     def reset_by_rcParams(self) -> None:
-        pass
+        value = plt.rcParams[self.key]
+        if self.key == "font.family":
+            value = value[0] if value else value
+
+        if value in self.items:
+            self.value = self.items.index(value)
+
+        return
 
 
 def _hexcolor2list(hexcolor: str) -> list[float]:

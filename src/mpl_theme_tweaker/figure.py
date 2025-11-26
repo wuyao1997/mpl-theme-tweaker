@@ -124,24 +124,7 @@ def plot_figure() -> Figure:
     )
     axs = axs.flatten()
 
-    # make a suptitle, in the same style for all subfigures,
-    # except those with dark backgrounds, which get a lighter color:
-    background_color = mcolors.rgb_to_hsv(
-        mcolors.to_rgb(plt.rcParams["figure.facecolor"])
-    )[2]
-    if background_color < 0.5:
-        title_color = [0.8, 0.8, 1]
-    else:
-        title_color = np.array([19, 6, 84]) / 256
-    fig.suptitle(
-        "Figure Title",
-        x=0.01,
-        ha="left",
-        color=title_color,
-        fontsize=14,
-        fontfamily="DejaVu Sans",
-        fontweight="normal",
-    )
+    fig.suptitle("Figure Title", x=0.01, ha="left")
 
     plot_scatter(axs[0], prng)
     plot_image_and_patch(axs[1], prng)

@@ -1,9 +1,12 @@
+from dataclasses import dataclass, field
 from typing import Callable
 
 from imgui_bundle import imgui
 import matplotlib.pyplot as plt
+from matplotlib.font_manager import fontManager
 
 from mpl_theme_tweaker.mpl_entry.section import (
+    Section,
     AxesSection,
     BoxplotSection,
     FigureSection,
@@ -13,13 +16,99 @@ from mpl_theme_tweaker.mpl_entry.section import (
     LegendSection,
     LinesSection,
 )
+from mpl_theme_tweaker._global import get_app_key
+
+_TABLE_FLAGS = imgui.TableFlags_.borders + imgui.TableFlags_.resizable
+_FONT_NAMES = ["None"] + sorted(set(fontManager.get_font_names()))
+
+
+@dataclass
+class _Font:
+    index: int = 0
+    name: str = "None"
+
+
+@dataclass
+class _FontFamilyManager:
+    family_names: list[str] = field(
+        default_factory=lambda: [
+            "serif",
+            "sans-serif",
+            "cursive",
+            "fantasy",
+            "monospace",
+        ]
+    )
+    N: int = 5
+    fonts: dict[str, list[_Font]] = field(init=False, default_factory=dict)
+
+    def __post_init__(self):
+        for family in self.family_names:
+            self.fonts[family] = [_Font() for _ in range(self.N)]
+
+    def apply(self) -> None:
+        for key, fonts in self.fonts.items():
+            font_names = [font.name for font in fonts if font.name != "None"]
+            plt.rcParams[f"font.{key}"] = font_names
+
+        replot_func = get_app_key("FigureWidow.replot_func")
+        if replot_func is not None:
+            replot_func()
+        return
+
+    def gui(self) -> None:
+        if imgui.begin_table("Font", 5, _TABLE_FLAGS):
+            imgui.table_headers_row()
+
+            title_font = get_app_key("title_font")
+            imgui.push_font(title_font, title_font.legacy_size)
+            for j, family_name in enumerate(self.family_names):
+                imgui.table_set_column_index(j)
+                imgui.text(family_name)
+            imgui.pop_font()
+
+            for i in range(self.N):
+                imgui.table_next_row()
+                for j, family_name in enumerate(self.family_names):
+                    imgui.table_set_column_index(j)
+                    current_font = self.fonts[family_name][i]
+
+                    imgui.push_item_width(-1)
+                    changed, new_index = imgui.combo(
+                        f"##font_{i}_{j}", current_font.index, _FONT_NAMES
+                    )
+                    if changed:
+                        current_font.index = new_index
+                        current_font.name = _FONT_NAMES[new_index]
+                    imgui.pop_item_width()
+
+            imgui.end_table()
+
+        if imgui.button("Apply"):
+            self.apply()
+        return
+
+    def reset_by_rcParams(self) -> None:
+        for family_name in self.family_names:
+            font_names = plt.rcParams[f"font.{family_name}"]
+            row = 0
+            for i, font_name in enumerate(font_names):
+                if row >= self.N:
+                    break
+                if font_name in _FONT_NAMES:
+                    index = _FONT_NAMES.index(font_name)
+                    self.fonts[family_name][row].index = index
+                    self.fonts[family_name][row].name = font_name
+                    row += 1
+        return
 
 
 class ParamsWindow:
     def __init__(self, callback: Callable):
         self.callback: Callable = callback
+        self.font_family_manager = _FontFamilyManager()
 
-        self.sections = [
+        self.sections: list[Section] = [
             FigureSection(),
             AxesSection(),
             TicksSection(),
@@ -38,6 +127,10 @@ class ParamsWindow:
                 if imgui.begin_tab_item(section.get_name())[0]:
                     section.gui()
                     imgui.end_tab_item()
+
+            if imgui.begin_tab_item("Font")[0]:
+                self.font_family_manager.gui()
+                imgui.end_tab_item()
             imgui.end_tab_bar()
 
         self.update_check()
@@ -54,6 +147,8 @@ class ParamsWindow:
     def reset_by_rcParams(self, call_callback: bool = True) -> None:
         for section in self.sections:
             section.reset_by_rcParams()
+
+        self.font_family_manager.reset_by_rcParams()
 
         if call_callback:
             self.callback()
