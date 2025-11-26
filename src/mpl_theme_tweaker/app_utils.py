@@ -1,6 +1,9 @@
 from imgui_bundle import hello_imgui, imgui
 
 
+from mpl_theme_tweaker._global import set_app_key
+
+
 def setup_theme() -> None:
     # Apply default style
     hello_imgui.imgui_default_settings.setup_default_imgui_style()
@@ -16,6 +19,11 @@ def load_fonts() -> None:
         hello_imgui.DefaultIconFont.font_awesome6
     )
     hello_imgui.imgui_default_settings.load_default_font_with_font_awesome_icons()
+
+    title_font = hello_imgui.load_font_ttf_with_font_awesome_icons(
+        "fonts/Roboto/Roboto-BoldItalic.ttf", 18
+    )
+    set_app_key("title_font", title_font)
     return
 
 

@@ -2,7 +2,9 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 import matplotlib.pyplot as plt
-from imgui_bundle import imgui
+from imgui_bundle import imgui, imgui_toggle
+
+from mpl_theme_tweaker._global import get_app_key
 
 
 class Entry(ABC):
@@ -40,6 +42,29 @@ class Entry(ABC):
         self.value = plt.rcParams[self.key]
         return
 
+    def __repr__(self) -> str:
+        return f"{self.label}: {self.value}"
+
+
+class SeparatorEntry(Entry):
+    def __init__(self, label: str):
+        super().__init__(label, "")
+
+        self.value = None
+
+    def gui(self) -> None:
+        title_font = get_app_key("title_font")
+        imgui.push_font(title_font, title_font.legacy_size)
+        imgui.separator_text(self.label)
+        imgui.pop_font()
+        return
+
+    def update_mpl_rcparams(self, value) -> None:
+        pass
+
+    def reset_by_rcParams(self) -> None:
+        pass
+
 
 class BoolEntry(Entry):
     def __init__(
@@ -51,7 +76,11 @@ class BoolEntry(Entry):
     def gui(self) -> None:
         super().gui()
 
-        changed, new_value = imgui.checkbox(self.label, self.value)
+        # changed, new_value = imgui.checkbox(self.label, self.value)
+        toggle_config = imgui_toggle.ios_style(size_scale=0.2)
+        changed, new_value = imgui_toggle.toggle(
+            self.label, self.value, config=toggle_config
+        )
         if changed:
             if new_value != self.value:
                 self.update_mpl_rcparams(new_value)
@@ -149,6 +178,12 @@ class FloatEntry(Entry):
                 self.update_mpl_rcparams(new_value)
         return
 
+    def reset_by_rcParams(self) -> None:
+        value = plt.rcParams[self.key]
+        if isinstance(value, float):
+            self.value = value
+        return
+
 
 class Float2Entry(Entry):
     """
@@ -185,6 +220,16 @@ class Float2Entry(Entry):
 
             if new_value != self.value:
                 self.update_mpl_rcparams(new_value)
+        return
+
+    def reset_by_rcParams(self) -> None:
+        value = plt.rcParams[self.key]
+        if isinstance(value, list) and len(value) == 2:
+            try:
+                value = [float(v) for v in value]
+            except ValueError:
+                return
+            self.value = value
         return
 
 
@@ -226,6 +271,28 @@ class StrEntry(Entry):
         pass
 
 
+def _hexcolor2list(hexcolor: str) -> list[float]:
+    """
+    Convert a hex color string to a list of RGBA values.
+    """
+    # delete # in the beginning
+    hexcolor = hexcolor.lower()
+    if hexcolor.startswith("#"):
+        hexcolor = hexcolor[1:]
+
+    # add alpha channel if not provided
+    if len(hexcolor) == 6:
+        hexcolor += "ff"
+
+    if len(hexcolor) != 8:
+        return [1.0] * 4
+
+    try:
+        return [int(hexcolor[i : i + 2], 16) / 255.0 for i in (0, 2, 4, 6)]
+    except ValueError:
+        return [1.0] * 4
+
+
 class ColorEntry(Entry):
     """
     dict info should like:
@@ -261,7 +328,20 @@ class ColorEntry(Entry):
         return
 
     def reset_by_rcParams(self) -> None:
-        # pass, because value from rcParams may not a tuple
-        # self.value = plt.rcParams[self.key]
-        # print(f"{self.key}, {self.value}, {plt.rcParams[self.key]}")
+        value = plt.rcParams[self.key]
+        if isinstance(value, list):
+            if len(value) == 4:
+                if all(0 <= v <= 1 for v in value):
+                    self.value = value
+        if isinstance(value, str):
+            if value == "black":
+                self.value = [0.0, 0.0, 0.0, 1.0]
+            elif value == "white":
+                self.value = [1.0, 1.0, 1.0, 1.0]
+            else:
+                self.value = _hexcolor2list(value)
         return
+
+
+if __name__ == "__main__":
+    print(_hexcolor2list("b0b0b0"))

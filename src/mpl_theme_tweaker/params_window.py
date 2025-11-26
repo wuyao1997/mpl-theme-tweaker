@@ -10,8 +10,6 @@ from mpl_theme_tweaker.mpl_entry.section import (
     ImageSection,
     TextSection,
     TicksSection,
-    FontSection,
-    LaTeXSection,
     LegendSection,
     LinesSection,
 )
@@ -28,11 +26,11 @@ class ParamsWindow:
             LinesSection(),
             LegendSection(),
             TextSection(),
-            FontSection(),
-            LaTeXSection(),
             BoxplotSection(),
             ImageSection(),
         ]
+
+        self.reset_by_default(call_callback=False)
 
     def gui(self) -> None:
         if imgui.begin_tab_bar("RcParams"):
@@ -53,16 +51,17 @@ class ParamsWindow:
                 section.update()
         return
 
-    def reset_by_rcParams(self) -> None:
+    def reset_by_rcParams(self, call_callback: bool = True) -> None:
         for section in self.sections:
             section.reset_by_rcParams()
 
-        self.callback()
+        if call_callback:
+            self.callback()
         return
 
-    def reset_by_default(self) -> None:
+    def reset_by_default(self, call_callback: bool = True) -> None:
         plt.style.use("default")
-        self.reset_by_rcParams()
+        self.reset_by_rcParams(call_callback)
         return
 
     def reset_by_style(self, style_name: str) -> None:

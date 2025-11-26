@@ -7,6 +7,7 @@ from mpl_theme_tweaker.mpl_entry.mpl_entry import (
     FloatEntry,
     Float2Entry,
     IntEntry,
+    SeparatorEntry,
     StrEntry,
 )
 
@@ -144,17 +145,13 @@ class FigureSection(Section):
             "stepfast": 0.05,
             "format": "%.4f",
         }
-        subplot_left = FloatEntry("subplot left", "figure.subplot.left", _info)
-
+        subplot_left = FloatEntry("left", "figure.subplot.left", _info)
         _info["value"] = 0.9
-        subplot_right = FloatEntry("subplot right", "figure.subplot.right", _info)
-
+        subplot_right = FloatEntry("right", "figure.subplot.right", _info)
         _info["value"] = 0.11
-        subplot_bottom = FloatEntry("subplot bottom", "figure.subplot.bottom", _info)
-
+        subplot_bottom = FloatEntry("bottom", "figure.subplot.bottom", _info)
         _info["value"] = 0.88
-        subplot_top = FloatEntry("subplot top", "figure.subplot.top", _info)
-
+        subplot_top = FloatEntry("top", "figure.subplot.top", _info)
         wspace = FloatEntry(
             "wspace",
             "figure.subplot.wspace",
@@ -227,12 +224,14 @@ class FigureSection(Section):
             titleweight,
             labelsize,
             labelweight,
+            SeparatorEntry("Subplot"),
             subplot_left,
             subplot_right,
             subplot_bottom,
             subplot_top,
             wspace,
             hspace,
+            SeparatorEntry("Misc"),
             savefig_transparent,
             savefig_format,
             savefig_bbox,
@@ -247,21 +246,33 @@ class AxesSection(Section):
         super().__init__()
 
     def _setup_entries(self) -> list[Entry]:
+        facecolor = ColorEntry("face", "axes.facecolor")
+        edgecolor = ColorEntry("edge", "axes.edgecolor", sameline=True)
+
+        linewidth = FloatEntry(
+            "line width",
+            "lines.linewidth",
+            {
+                "value": 1.5,
+                "vmin": 0.0,
+                "vmax": 10.0,
+                "step": 0.1,
+                "stepfast": 1.0,
+                "format": "%.3f",
+            },
+        )
+
         spines_left = BoolEntry("left", "axes.spines.left", True)
         spines_right = BoolEntry("right", "axes.spines.right", True, sameline=True)
         spines_bottom = BoolEntry("bottom", "axes.spines.bottom", True, sameline=True)
-        spines_top = BoolEntry("top spines", "axes.spines.top", True, sameline=True)
+        spines_top = BoolEntry("top", "axes.spines.top", True, sameline=True)
 
-        facecolor = ColorEntry("face", "axes.facecolor")
-        edgecolor = ColorEntry("edge", "axes.edgecolor", sameline=True)
-        titlecolor = ColorEntry("title", "axes.titlecolor", sameline=True)
-        labelcolor = ColorEntry("label", "axes.labelcolor", sameline=True)
-
+        grid_color = ColorEntry("color", "grid.color")
         grid = BoolEntry("grid", "axes.grid")
         polar_grid = BoolEntry("polar axes grid", "polaraxes.grid", True, sameline=True)
         axes3d_grid = BoolEntry("3D axes grid", "axes3d.grid", True, sameline=True)
         grid_axis = StrEntry(
-            "grid axis",
+            "axis",
             "axes.grid.axis",
             {
                 "value": 2,
@@ -269,16 +280,15 @@ class AxesSection(Section):
             },
         )
         grid_which = StrEntry(
-            "grid which",
+            "which",
             "axes.grid.which",
             {
                 "value": 2,
                 "items": ["major", "minor", "both"],
             },
         )
-        grid_color = ColorEntry("grid color", "grid.color")
         grid_linestyle = StrEntry(
-            "grid linestyle",
+            "linestyle",
             "grid.linestyle",
             {
                 "value": 0,
@@ -286,7 +296,7 @@ class AxesSection(Section):
             },
         )
         grid_linewidth = FloatEntry(
-            "grid linewidth",
+            "linewidth",
             "grid.linewidth",
             {
                 "value": 0.8,
@@ -298,7 +308,7 @@ class AxesSection(Section):
             },
         )
         grid_alpha = FloatEntry(
-            "grid alpha",
+            "alpha",
             "grid.alpha",
             {
                 "value": 0.5,
@@ -310,8 +320,9 @@ class AxesSection(Section):
             },
         )
 
+        titlecolor = ColorEntry("color ", "axes.titlecolor")
         title_location = StrEntry(
-            "title location",
+            "location",
             "axes.titlelocation",
             {
                 "value": 0,
@@ -319,7 +330,7 @@ class AxesSection(Section):
             },
         )
         titlesize = StrEntry(
-            "title size",
+            "size",
             "axes.titlesize",
             {
                 "value": 0,
@@ -327,7 +338,7 @@ class AxesSection(Section):
             },
         )
         titleweight = StrEntry(
-            "title weight",
+            "weight",
             "axes.titleweight",
             {
                 "value": 0,
@@ -359,6 +370,7 @@ class AxesSection(Section):
             },
         )
 
+        labelcolor = ColorEntry("color  ", "axes.labelcolor")
         labelsize = StrEntry(
             "label size",
             "axes.labelsize",
@@ -367,7 +379,6 @@ class AxesSection(Section):
                 "items": ["small", "medium", "large"],
             },
         )
-
         labelweight = StrEntry(
             "label weight",
             "axes.labelweight",
@@ -376,7 +387,6 @@ class AxesSection(Section):
                 "items": ["normal", "bold"],
             },
         )
-
         labelpad = FloatEntry(
             "label pad",
             "axes.labelpad",
@@ -403,19 +413,6 @@ class AxesSection(Section):
             {
                 "value": 1,
                 "items": ["left", "center", "right"],
-            },
-        )
-
-        linewidth = FloatEntry(
-            "line width",
-            "lines.linewidth",
-            {
-                "value": 1.5,
-                "vmin": 0.0,
-                "vmax": 10.0,
-                "step": 0.1,
-                "stepfast": 1.0,
-                "format": "%.3f",
             },
         )
 
@@ -466,54 +463,60 @@ class AxesSection(Section):
             },
         )
 
-        axes3d_automargin = BoolEntry("3D axes automargin", "axes3d.automargin", False)
+        axes3d_automargin = BoolEntry("automargin", "axes3d.automargin", False)
 
-        axes3d_xaxis_panecolor = ColorEntry("3D xaxis pane", "axes3d.xaxis.panecolor")
+        axes3d_xaxis_panecolor = ColorEntry("xaxis pane", "axes3d.xaxis.panecolor")
         axes3d_yaxis_panecolor = ColorEntry(
-            "3D yaxis pane", "axes3d.yaxis.panecolor", sameline=True
+            "yaxis pane", "axes3d.yaxis.panecolor", sameline=True
         )
         axes3d_zaxis_panecolor = ColorEntry(
-            "3D zaxis pane", "axes3d.zaxis.panecolor", sameline=True
+            "zaxis pane", "axes3d.zaxis.panecolor", sameline=True
         )
 
         return [
+            facecolor,
+            edgecolor,
+            linewidth,
+            SeparatorEntry("Spines"),
             spines_left,
             spines_right,
             spines_bottom,
             spines_top,
-            facecolor,
-            edgecolor,
-            titlecolor,
-            labelcolor,
+            SeparatorEntry("Grid"),
+            grid_color,
             grid,
             polar_grid,
             axes3d_grid,
             grid_axis,
             grid_which,
-            grid_color,
             grid_linestyle,
             grid_linewidth,
             grid_alpha,
+            SeparatorEntry("Title"),
+            titlecolor,
             title_location,
             titlesize,
             titleweight,
             titley,
             titlepad,
+            SeparatorEntry("Label"),
+            labelcolor,
             labelsize,
             labelweight,
             labelpad,
             xlabelloc,
             ylabelloc,
-            linewidth,
+            SeparatorEntry("Axes 3d"),
+            axes3d_automargin,
+            axes3d_xaxis_panecolor,
+            axes3d_yaxis_panecolor,
+            axes3d_zaxis_panecolor,
+            SeparatorEntry("Misc"),
             unicode_minus,
             xmargin,
             ymargin,
             zmargin,
             autolimit_mode,
-            axes3d_automargin,
-            axes3d_xaxis_panecolor,
-            axes3d_yaxis_panecolor,
-            axes3d_zaxis_panecolor,
         ]
 
 
@@ -529,6 +532,8 @@ class TicksSection(Section):
         yleft = BoolEntry("y left", "ytick.left", True, sameline=True)
         yright = BoolEntry("y right", "ytick.right", False, sameline=True)
 
+        xcolor = ColorEntry("x color", "xtick.color")
+        ycolor = ColorEntry("y color", "ytick.color", sameline=True)
         xlabeltop = BoolEntry("x label top", "xtick.labeltop", False)
         xlabelbottom = BoolEntry(
             "x label bottom", "xtick.labelbottom", True, sameline=True
@@ -537,14 +542,8 @@ class TicksSection(Section):
         ylabelright = BoolEntry(
             "y label right", "ytick.labelright", False, sameline=True
         )
-
-        xcolor = ColorEntry("x color", "xtick.color")
-        ycolor = ColorEntry("y color", "ytick.color", sameline=True)
         xlabelcolor = ColorEntry("x label color", "xtick.labelcolor")
         ylabelcolor = ColorEntry("y label color", "ytick.labelcolor", sameline=True)
-
-        xvisible = BoolEntry("x visible", "xtick.visible", True)
-        yvisible = BoolEntry("y visible", "ytick.visible", True, sameline=True)
 
         major_size = FloatEntry(
             "major size",
@@ -571,8 +570,8 @@ class TicksSection(Section):
             },
         )
         major_pad = FloatEntry(
-            "minor size",
-            "xtick.minor.pad",
+            "major pad",
+            "xtick.major.pad",
             {
                 "value": 3.5,
                 "vmin": 0.0,
@@ -595,9 +594,8 @@ class TicksSection(Section):
                 "format": "%.3f",
             },
         )
-
         minor_width = FloatEntry(
-            "minor width宽度",
+            "minor width",
             "xtick.minor.width",
             {
                 "value": 0.6,
@@ -608,7 +606,6 @@ class TicksSection(Section):
                 "format": "%.3f",
             },
         )
-
         minor_pad = FloatEntry(
             "minor pad",
             "xtick.minor.pad",
@@ -621,28 +618,34 @@ class TicksSection(Section):
                 "format": "%.3f",
             },
         )
+        xvisible = BoolEntry("x visible", "xtick.minor.visible", True)
+        yvisible = BoolEntry("y visible", "ytick.minor.visible", True, sameline=True)
 
         return [
+            SeparatorEntry("Tick line"),
             xtop,
             xbottom,
             yleft,
             yright,
+            xcolor,
+            ycolor,
+            SeparatorEntry("Tick Label"),
             xlabeltop,
             xlabelbottom,
             ylabelleft,
             ylabelright,
-            xcolor,
-            ycolor,
             xlabelcolor,
             ylabelcolor,
-            xvisible,
-            yvisible,
+            SeparatorEntry("Major tick"),
             major_size,
             major_width,
             major_pad,
+            SeparatorEntry("Minor tick"),
             minor_size,
             minor_width,
             minor_pad,
+            xvisible,
+            yvisible,
         ]
 
 
@@ -653,14 +656,7 @@ class LinesSection(Section):
         super().__init__()
 
     def _setup_entries(self) -> list[Entry]:
-        color = ColorEntry("line", "lines.color")
-        markerfacecolor = ColorEntry(
-            "marker face", "lines.markerfacecolor", sameline=True
-        )
-        markeredgecolor = ColorEntry(
-            "marker edge", "lines.markeredgecolor", sameline=True
-        )
-
+        color = ColorEntry("color", "lines.color")
         linewidth = FloatEntry(
             "line width",
             "lines.linewidth",
@@ -673,7 +669,6 @@ class LinesSection(Section):
                 "format": "%.3f",
             },
         )
-
         linestyle = StrEntry(
             "line style",
             "lines.linestyle",
@@ -682,7 +677,12 @@ class LinesSection(Section):
                 "items": ["-", "--", "-.", ":"],
             },
         )
+        antialiased = BoolEntry("antialiased", "lines.antialiased", True)
 
+        markerfacecolor = ColorEntry("facecolor", "lines.markerfacecolor")
+        markeredgecolor = ColorEntry(
+            "edge color", "lines.markeredgecolor", sameline=True
+        )
         marker = StrEntry(
             "marker",
             "lines.marker",
@@ -744,10 +744,8 @@ class LinesSection(Section):
             },
         )
 
-        antialiased = BoolEntry("antialiased", "lines.antialiased", True)
-
-        patch_facecolor = ColorEntry("patch face", "patch.facecolor")
-        patch_edgecolor = ColorEntry("patch edge", "patch.edgecolor", sameline=True)
+        patch_facecolor = ColorEntry("facecolor ", "patch.facecolor")
+        patch_edgecolor = ColorEntry("edge color ", "patch.edgecolor", sameline=True)
         patch_force_edgecolor = BoolEntry(
             "patch force edgecolor", "patch.force_edgecolor", sameline=True
         )
@@ -780,21 +778,25 @@ class LinesSection(Section):
         )
 
         return [
+            SeparatorEntry("Line"),
             color,
-            markerfacecolor,
-            markeredgecolor,
             linewidth,
             linestyle,
+            antialiased,
+            SeparatorEntry("Marker"),
+            markerfacecolor,
+            markeredgecolor,
             marker,
             markeredgewidth,
             markersize,
             fillstyle,
-            antialiased,
+            SeparatorEntry("Patch"),
             patch_facecolor,
             patch_edgecolor,
             patch_force_edgecolor,
             patch_linewidth,
             patch_antialiased,
+            SeparatorEntry("Hatch"),
             hatch_color,
             hatch_linewidth,
         ]
@@ -807,6 +809,9 @@ class LegendSection(Section):
         super().__init__()
 
     def _setup_entries(self) -> list[Entry]:
+        facecolor = ColorEntry("face color", "legend.facecolor")
+        edgecolor = ColorEntry("edge color", "legend.edgecolor", sameline=True)
+        labelcolor = ColorEntry("label color", "legend.labelcolor", sameline=True)
         loc = StrEntry(
             "legend location",
             "legend.loc",
@@ -827,6 +832,22 @@ class LegendSection(Section):
                 ],
             },
         )
+        fontsize = StrEntry(
+            "font size",
+            "legend.fontsize",
+            {
+                "value": 0,
+                "items": [
+                    "xx-small",
+                    "x-small",
+                    "small",
+                    "medium",
+                    "large",
+                    "x-large",
+                    "xx-large",
+                ],
+            },
+        )
 
         frameon = BoolEntry("frame on", "legend.frameon", True)
         fancybox = BoolEntry("fancy box", "legend.fancybox", True, sameline=True)
@@ -843,10 +864,6 @@ class LegendSection(Section):
                 "format": "%.3f",
             },
         )
-
-        facecolor = ColorEntry("face color", "legend.facecolor")
-        edgecolor = ColorEntry("edge color", "legend.edgecolor", sameline=True)
-        labelcolor = ColorEntry("label color", "legend.labelcolor", sameline=True)
 
         num_points = IntEntry(
             "number of points",
@@ -880,22 +897,6 @@ class LegendSection(Section):
                 "step": 0.1,
                 "stepfast": 0.5,
                 "format": "%.3f",
-            },
-        )
-        fontsize = StrEntry(
-            "font size",
-            "legend.fontsize",
-            {
-                "value": 0,
-                "items": [
-                    "xx-small",
-                    "x-small",
-                    "small",
-                    "medium",
-                    "large",
-                    "x-large",
-                    "xx-large",
-                ],
             },
         )
 
@@ -985,18 +986,21 @@ class LegendSection(Section):
         )
 
         return [
+            facecolor,
+            edgecolor,
+            labelcolor,
             loc,
+            fontsize,
+            SeparatorEntry("Frame"),
             frameon,
             shadow,
             fancybox,
             framealpha,
-            facecolor,
-            edgecolor,
-            labelcolor,
+            SeparatorEntry("Marker"),
             num_points,
             scatter_points,
             markerscale,
-            fontsize,
+            SeparatorEntry("Layout"),
             borderpad,
             borderaxespad,
             labelspacing,
@@ -1088,7 +1092,7 @@ class ImageSection(Section):
         )
 
         resample = BoolEntry("resample", "image.resample", True)
-        composite = BoolEntry("composite", "image.composite", True, sameline=True)
+        composite = BoolEntry("composite", "image.composite_image", True, sameline=True)
 
         return [aspect, interpolation, cmap, lut, origin, resample, composite]
 
@@ -1370,6 +1374,7 @@ class BoxplotSection(Section):
             showfliers,
             meanline,
             whiskers,
+            SeparatorEntry("Flier Properties"),
             flier_marker,
             flier_color,
             flier_markerfacecolor,
@@ -1378,18 +1383,23 @@ class BoxplotSection(Section):
             flier_markersize,
             flier_linestyle,
             flier_linewidth,
+            SeparatorEntry("Box Properties"),
             box_color,
             box_linewidth,
             box_linestyle,
+            SeparatorEntry("Whisker Properties"),
             whisker_color,
             whisker_linewidth,
             whisker_linestyle,
+            SeparatorEntry("Cap Properties"),
             cap_color,
             cap_linewidth,
             cap_linestyle,
+            SeparatorEntry("Median Properties"),
             median_color,
             median_linewidth,
             median_linestyle,
+            SeparatorEntry("Mean Properties"),
             mean_color,
             mean_linewidth,
             mean_linestyle,
@@ -1407,29 +1417,6 @@ class TextSection(Section):
         super().__init__()
 
     def _setup_entries(self) -> list[Entry]:
-        color = ColorEntry("text color", "text.color")
-        hinting = StrEntry(
-            "text hinting",
-            "text.hinting",
-            {
-                "value": 0,
-                "items": ["default", "no_autohint", "force_autohint", "no_hinting"],
-            },
-        )
-
-        antialiased = BoolEntry("antialiased", "text.antialiased", True)
-        parse_math = BoolEntry("parse math", "text.parse_math", True, sameline=True)
-
-        return [color, hinting, antialiased, parse_math]
-
-
-class FontSection(Section):
-    __SECTION_NAME__ = "Font"
-
-    def __init__(self):
-        super().__init__()
-
-    def _setup_entries(self) -> list[Entry]:
         family = StrEntry(
             "font family",
             "font.family",
@@ -1438,7 +1425,6 @@ class FontSection(Section):
                 "items": ["serif", "sans-serif", "cursive", "fantasy", "monospace"],
             },
         )
-
         style = StrEntry(
             "font style",
             "font.style",
@@ -1447,7 +1433,6 @@ class FontSection(Section):
                 "items": ["normal", "italic", "oblique"],
             },
         )
-
         variant = StrEntry(
             "font variant",
             "font.variant",
@@ -1456,7 +1441,6 @@ class FontSection(Section):
                 "items": ["normal", "small-caps"],
             },
         )
-
         weight = StrEntry(
             "font weight",
             "font.weight",
@@ -1465,7 +1449,6 @@ class FontSection(Section):
                 "items": ["normal", "bold", "heavy", "light", "medium", "semibold"],
             },
         )
-
         size = FloatEntry(
             "font size",
             "font.size",
@@ -1479,17 +1462,6 @@ class FontSection(Section):
             },
         )
 
-        return [family, style, variant, weight, size]
-
-
-class LaTeXSection(Section):
-    __SECTION_NAME__ = "LaTeX"
-
-    def __init__(self):
-        super().__init__()
-
-    def _setup_entries(self) -> list[Entry]:
-        # usetex = BoolEntry("use tex", "text.usetex", False)
         mathtext_fontset = StrEntry(
             "mathtext fontset",
             "mathtext.fontset",
@@ -1506,4 +1478,30 @@ class LaTeXSection(Section):
             },
         )
 
-        return [mathtext_fontset]
+        color = ColorEntry("text color", "text.color")
+        antialiased = BoolEntry("antialiased", "text.antialiased", True, sameline=True)
+        parse_math = BoolEntry("parse math", "text.parse_math", True, sameline=True)
+        hinting = StrEntry(
+            "text hinting",
+            "text.hinting",
+            {
+                "value": 0,
+                "items": ["default", "no_autohint", "force_autohint", "no_hinting"],
+            },
+        )
+
+        return [
+            SeparatorEntry("Font"),
+            family,
+            style,
+            variant,
+            weight,
+            size,
+            SeparatorEntry("LaTeX"),
+            mathtext_fontset,
+            SeparatorEntry("Text"),
+            color,
+            antialiased,
+            parse_math,
+            hinting,
+        ]
