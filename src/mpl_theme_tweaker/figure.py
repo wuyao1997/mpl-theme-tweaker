@@ -38,14 +38,14 @@ def plot_colored_lines(ax):
     return ax
 
 
-def plot_bar_graphs(ax, prng, min_value=5, max_value=25, nb_samples=5):
+def plot_bar_graphs(ax, prng, min_value=5, max_value=25, nb_samples=4):
     """Plot two bar graphs side by side, with letters as x-tick labels."""
     x = np.arange(nb_samples)
     ya, yb = prng.randint(min_value, max_value, size=(2, nb_samples))
-    width = 0.25
-    ax.bar(x, ya, width, hatch=r"//")
-    ax.bar(x + width, yb, width, color="C2", hatch=r"\\")
-    ax.set_xticks(x + width, labels=["a", "b", "c", "d", "e"])
+    width = 0.35
+    ax.bar(x + width / 2, ya, width, hatch=r"//")
+    ax.bar(x + width * 3 / 2, yb, width, color="C2", hatch=r"\\")
+    ax.set_xticks(x + width, labels=["a", "b", "c", "d"])
     return ax
 
 
