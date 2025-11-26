@@ -1,5 +1,5 @@
 import glfw
-from imgui_bundle import hello_imgui, glfw_utils
+from imgui_bundle import hello_imgui, glfw_utils  # type: ignore
 from PIL import Image
 
 

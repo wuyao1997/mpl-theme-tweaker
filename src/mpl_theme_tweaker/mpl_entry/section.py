@@ -45,6 +45,14 @@ class Section(ABC):
             entry.reset_by_rcParams()
         return
 
+    def to_str(self) -> str:
+        header = f"## {'*' * 71}\n## * {self.get_name():<68}*\n## {'*' * 71}\n"
+        body: list[str] = []
+        for entry in self.entries:
+            body.append(entry.to_str())
+
+        return header + "\n".join(body)
+
 
 class FigureSection(Section):
     __SECTION_NAME__ = "Figure"
@@ -249,9 +257,9 @@ class AxesSection(Section):
         facecolor = ColorEntry("face", "axes.facecolor")
         edgecolor = ColorEntry("edge", "axes.edgecolor", sameline=True)
 
-        linewidth = FloatEntry(
-            "line width",
-            "lines.linewidth",
+        spinewidth = FloatEntry(
+            "spines width",
+            "axes.linewidth",
             {
                 "value": 1.5,
                 "vmin": 0.0,
@@ -261,7 +269,6 @@ class AxesSection(Section):
                 "format": "%.3f",
             },
         )
-
         spines_left = BoolEntry("left", "axes.spines.left", True)
         spines_right = BoolEntry("right", "axes.spines.right", True, sameline=True)
         spines_bottom = BoolEntry("bottom", "axes.spines.bottom", True, sameline=True)
@@ -476,8 +483,8 @@ class AxesSection(Section):
         return [
             facecolor,
             edgecolor,
-            linewidth,
             SeparatorEntry("Spines"),
+            spinewidth,
             spines_left,
             spines_right,
             spines_bottom,

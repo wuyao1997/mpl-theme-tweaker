@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Callable
 
 from imgui_bundle import imgui
@@ -164,3 +165,13 @@ class ParamsWindow:
         plt.style.use(style_name)
         self.reset_by_rcParams()
         return
+
+    def save2matlotlibrc(self, filepath: str) -> None:
+        print("# Not Implemented Yet")
+        return
+
+    def get_style_str(self) -> str:
+        text = "## written by mpl-theme-tweaker, version 0.1.0\n"
+        for section in self.sections:
+            text += section.to_str() + "\n\n"
+        return text

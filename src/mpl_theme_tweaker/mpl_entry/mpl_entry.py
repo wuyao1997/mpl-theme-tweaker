@@ -1,8 +1,9 @@
 from abc import ABC
 from typing import Any
 
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
-from imgui_bundle import imgui, imgui_toggle
+from imgui_bundle import imgui, imgui_toggle  # type: ignore
 
 from mpl_theme_tweaker._global import get_app_key
 
@@ -47,6 +48,9 @@ class Entry(ABC):
     def __repr__(self) -> str:
         return f"{self.label}: {self.value}"
 
+    def to_str(self) -> str:
+        return f"{self.key}: {self.value}"
+
 
 class SeparatorEntry(Entry):
     def __init__(self, label: str):
@@ -66,6 +70,9 @@ class SeparatorEntry(Entry):
 
     def reset_by_rcParams(self) -> None:
         pass
+
+    def to_str(self) -> str:
+        return ""
 
 
 class BoolEntry(Entry):
@@ -186,6 +193,9 @@ class FloatEntry(Entry):
             self.value = value
         return
 
+    def to_str(self) -> str:
+        return f"{self.key}: {self.value:.4f}"
+
 
 class Float2Entry(Entry):
     """
@@ -234,6 +244,9 @@ class Float2Entry(Entry):
             self.value = value
         return
 
+    def to_str(self) -> str:
+        return f"{self.key}: {self.value[0]:.4f}, {self.value[1]:.4f}"
+
 
 class Float4Entry(Entry):
     pass
@@ -276,30 +289,10 @@ class StrEntry(Entry):
 
         if value in self.items:
             self.value = self.items.index(value)
-
         return
 
-
-def _hexcolor2list(hexcolor: str) -> list[float]:
-    """
-    Convert a hex color string to a list of RGBA values.
-    """
-    # delete # in the beginning
-    hexcolor = hexcolor.lower()
-    if hexcolor.startswith("#"):
-        hexcolor = hexcolor[1:]
-
-    # add alpha channel if not provided
-    if len(hexcolor) == 6:
-        hexcolor += "ff"
-
-    if len(hexcolor) != 8:
-        return [1.0] * 4
-
-    try:
-        return [int(hexcolor[i : i + 2], 16) / 255.0 for i in (0, 2, 4, 6)]
-    except ValueError:
-        return [1.0] * 4
+    def to_str(self) -> str:
+        return f'{self.key}: "{self.items[self.value]}"'
 
 
 class ColorEntry(Entry):
@@ -338,19 +331,30 @@ class ColorEntry(Entry):
 
     def reset_by_rcParams(self) -> None:
         value = plt.rcParams[self.key]
-        if isinstance(value, list):
-            if len(value) == 4:
-                if all(0 <= v <= 1 for v in value):
-                    self.value = value
-        if isinstance(value, str):
-            if value == "black":
-                self.value = [0.0, 0.0, 0.0, 1.0]
-            elif value == "white":
-                self.value = [1.0, 1.0, 1.0, 1.0]
-            else:
-                self.value = _hexcolor2list(value)
+
+        # handle "auto" and "inherit" cases
+        if value == "auto":
+            if self.key in ["lines.markerfacecolor", "axes.edgecolor"]:
+                value = plt.rcParams["lines.color"]
+            elif self.key == "axes.titlecolor":
+                value = plt.rcParams["text.color"]
+        elif value == "inherit":
+            if self.key == "xtick.labelcolor":
+                value = plt.rcParams["xtick.color"]
+            elif self.key == "ytick.labelcolor":
+                value = plt.rcParams["ytick.color"]
+            elif self.key == "legend.facecolor":
+                value = plt.rcParams["axes.facecolor"]
+
+        try:
+            rgba = mcolors.to_rgba(value)
+        except ValueError:
+            print(f"Invalid color value for {self.key}: {value}, use white instead.")
+            rgba = [1.0, 1.0, 1.0, 1.0]
+            return
+
+        self.value = rgba
         return
 
-
-if __name__ == "__main__":
-    print(_hexcolor2list("b0b0b0"))
+    def to_str(self) -> str:
+        return f'{self.key}: "{mcolors.to_hex(self.value)}"'

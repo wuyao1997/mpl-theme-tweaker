@@ -1,4 +1,4 @@
-from imgui_bundle import hello_imgui, imgui, immapp
+from imgui_bundle import hello_imgui, imgui, immapp  # type: ignore
 
 # from imgui_bundle.demos_python import demo_utils
 import matplotlib.pyplot as plt
@@ -78,7 +78,7 @@ class Application:
 
     def _setup_save_settings(self) -> None:
         self.params.ini_folder_type = hello_imgui.IniFolderType.current_folder
-        self.params.ini_filename = ".local/mpl-theme-tweaker.ini"
+        self.params.ini_filename = ".ini/mpl-theme-tweaker.ini"
         return
 
     def _setup_addon(self) -> None:
@@ -152,7 +152,12 @@ class Application:
         imgui.separator_text("Save")
         imgui.menu_item("Save", "", False)
         imgui.menu_item("Save As", "", False)
-        imgui.menu_item("Copy to Clipboard", "", False)
+        copy_clicked, _ = imgui.menu_item("Copy to Clipboard", "", False)
+        if copy_clicked:
+            style_str = self.params_window.get_style_str()
+            print(style_str)
+
+            imgui.set_clipboard_text(style_str)
 
         # shortcut must be put in main loop or gui always show
         # if imgui.is_key_chord_pressed(imgui.Key.mod_ctrl | imgui.Key.s):
