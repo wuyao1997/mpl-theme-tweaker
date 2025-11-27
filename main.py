@@ -1,31 +1,12 @@
-import os
-from pathlib import Path
+import json
 
-from imgui_bundle import hello_imgui, icons_fontawesome_6, imgui, immapp  # type: ignore
-
-# from imgui_bundle.demos_python import demo_utils
 import matplotlib.pyplot as plt
+from imgui_bundle import hello_imgui, imgui, immapp  # type: ignore
 
-from mpl_theme_tweaker.app_utils import (
-    get_downloads_folder,
-    setup_theme,
-    set_window_icon,
-    load_fonts,
-)
+from mpl_theme_tweaker.app_utils import setup_theme, set_window_icon, load_fonts
 from mpl_theme_tweaker.figure_window import FigureWindow
 from mpl_theme_tweaker.params_window import ParamsWindow
 from mpl_theme_tweaker._global import assetsPath
-
-
-class Config:
-    def __init__(self):
-        self.download_path = ""
-
-    def save(self) -> None:
-        pass
-
-    def load(self) -> None:
-        pass
 
 
 class Application:
@@ -136,10 +117,26 @@ class Application:
         cb.load_additional_fonts = load_fonts
         cb.show_status = lambda: imgui.text("CopyRight pplotter.com @ 2025")
         cb.show_menus = self.show_menu_gui
-        cb.show_app_menu_items = self.show_app_menu_gui
-        cb.post_init = lambda: set_window_icon()
-        cb.before_exit = lambda: print("before_exit callback called")
+        cb.show_app_menu_items = self.params_window.gui_app_menu
+        cb.post_init = self._init
+        cb.before_exit = self._exit
         cb.setup_imgui_style = setup_theme
+        return
+
+    def _init(self) -> None:
+        set_window_icon()
+
+        app_settings_str = hello_imgui.load_user_pref("MplThemeTweakerSettings")
+        if app_settings_str:
+            app_settings = json.loads(app_settings_str)
+            if isinstance(app_settings, dict):
+                self.params_window.load_app_settings(app_settings)
+        return
+
+    def _exit(self) -> None:
+        app_settings = self.params_window.get_app_settings()
+        app_settings_str = json.dumps(app_settings, indent=4)
+        hello_imgui.save_user_pref("MplThemeTweakerSettings", app_settings_str)
         return
 
     def run(self) -> None:
@@ -163,64 +160,6 @@ class Application:
                 imgui.end_menu()
 
             imgui.end_menu()
-        return
-
-    def show_app_menu_gui(self) -> None:
-        imgui.menu_item(f"{icons_fontawesome_6.ICON_FA_FILE} Open", "", False)
-        # imgui.separator_text("Save")
-        imgui.separator()
-        # ======================== Save =====================
-        save_clicked, _ = imgui.menu_item(
-            f"{icons_fontawesome_6.ICON_FA_FLOPPY_DISK} Save", "", False
-        )
-        # ====================== Save As ====================
-        saveas_clicked, _ = imgui.menu_item(
-            f"{icons_fontawesome_6.ICON_FA_FILE_EXPORT} Save As", "", False
-        )
-        # ===================== Download ====================
-        download_clicked, _ = imgui.menu_item(
-            f"{icons_fontawesome_6.ICON_FA_FILE_ARROW_DOWN} Download", "", False
-        )
-        if download_clicked:
-            # 保持文件，路径不存在则放弃，存在同名文件，则加上(n)区分
-            directory = get_downloads_folder()
-            if not directory.exists():
-                print(f"Downloads folder ``{directory}`` does not exist")
-                return
-
-            filepath = directory / "matplotlibrc"
-            if filepath.exists():
-                n = 1
-                while True:
-                    new_filepath = filepath.with_name(
-                        f"{filepath.stem}({n}){filepath.suffix}"
-                    )
-                    if not new_filepath.exists():
-                        filepath = new_filepath
-                        break
-                    n += 1
-            style_str = self.params_window.get_style_str()
-            filepath.write_text(style_str)
-            print(f"Style saved to ``{filepath}``")
-
-        # ================ Copy to Clipboard ================
-        copy_clicked, _ = imgui.menu_item(
-            f"{icons_fontawesome_6.ICON_FA_COPY} Copy to Clipboard", "", False
-        )
-        if copy_clicked:
-            style_str = self.params_window.get_style_str()
-            imgui.set_clipboard_text(style_str)
-
-        # shortcut must be put in main loop or gui always show
-        # if imgui.is_key_chord_pressed(imgui.Key.mod_ctrl | imgui.Key.s):
-        #     print("Ctrl + S pressed")
-
-        # clicked, _ = imgui.menu_item("A Custom app menu item", "", False)
-        # if clicked:
-        #     print("Clicked on A Custom app menu item")
-        #     hello_imgui.log(
-        #         hello_imgui.LogLevel.info, "Clicked on A Custom app menu item"
-        #     )
         return
 
 
