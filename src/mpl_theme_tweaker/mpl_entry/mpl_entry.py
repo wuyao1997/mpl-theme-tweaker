@@ -333,8 +333,8 @@ class ColorEntry(Entry):
         value = plt.rcParams[self.key]
 
         # handle "auto" and "inherit" cases
-        if value == "auto":
-            if self.key in ["lines.markerfacecolor", "axes.edgecolor"]:
+        if value == "auto":  # maybe need recover to default value
+            if self.key in ["lines.markerfacecolor", "lines.markeredgecolor"]:
                 value = plt.rcParams["lines.color"]
             elif self.key == "axes.titlecolor":
                 value = plt.rcParams["text.color"]

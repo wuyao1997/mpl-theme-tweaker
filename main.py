@@ -1,12 +1,31 @@
-from imgui_bundle import hello_imgui, imgui, immapp  # type: ignore
+import os
+from pathlib import Path
+
+from imgui_bundle import hello_imgui, icons_fontawesome_6, imgui, immapp  # type: ignore
 
 # from imgui_bundle.demos_python import demo_utils
 import matplotlib.pyplot as plt
 
-from mpl_theme_tweaker.app_utils import setup_theme, set_window_icon, load_fonts
+from mpl_theme_tweaker.app_utils import (
+    get_downloads_folder,
+    setup_theme,
+    set_window_icon,
+    load_fonts,
+)
 from mpl_theme_tweaker.figure_window import FigureWindow
 from mpl_theme_tweaker.params_window import ParamsWindow
 from mpl_theme_tweaker._global import assetsPath
+
+
+class Config:
+    def __init__(self):
+        self.download_path = ""
+
+    def save(self) -> None:
+        pass
+
+    def load(self) -> None:
+        pass
 
 
 class Application:
@@ -147,16 +166,49 @@ class Application:
         return
 
     def show_app_menu_gui(self) -> None:
-        imgui.menu_item("Open", "", False)
-        imgui.menu_item("Open Recent", "", False)
-        imgui.separator_text("Save")
-        imgui.menu_item("Save", "", False)
-        imgui.menu_item("Save As", "", False)
-        copy_clicked, _ = imgui.menu_item("Copy to Clipboard", "", False)
+        imgui.menu_item(f"{icons_fontawesome_6.ICON_FA_FILE} Open", "", False)
+        # imgui.separator_text("Save")
+        imgui.separator()
+        # ======================== Save =====================
+        save_clicked, _ = imgui.menu_item(
+            f"{icons_fontawesome_6.ICON_FA_FLOPPY_DISK} Save", "", False
+        )
+        # ====================== Save As ====================
+        saveas_clicked, _ = imgui.menu_item(
+            f"{icons_fontawesome_6.ICON_FA_FILE_EXPORT} Save As", "", False
+        )
+        # ===================== Download ====================
+        download_clicked, _ = imgui.menu_item(
+            f"{icons_fontawesome_6.ICON_FA_FILE_ARROW_DOWN} Download", "", False
+        )
+        if download_clicked:
+            # 保持文件，路径不存在则放弃，存在同名文件，则加上(n)区分
+            directory = get_downloads_folder()
+            if not directory.exists():
+                print(f"Downloads folder ``{directory}`` does not exist")
+                return
+
+            filepath = directory / "matplotlibrc"
+            if filepath.exists():
+                n = 1
+                while True:
+                    new_filepath = filepath.with_name(
+                        f"{filepath.stem}({n}){filepath.suffix}"
+                    )
+                    if not new_filepath.exists():
+                        filepath = new_filepath
+                        break
+                    n += 1
+            style_str = self.params_window.get_style_str()
+            filepath.write_text(style_str)
+            print(f"Style saved to ``{filepath}``")
+
+        # ================ Copy to Clipboard ================
+        copy_clicked, _ = imgui.menu_item(
+            f"{icons_fontawesome_6.ICON_FA_COPY} Copy to Clipboard", "", False
+        )
         if copy_clicked:
             style_str = self.params_window.get_style_str()
-            print(style_str)
-
             imgui.set_clipboard_text(style_str)
 
         # shortcut must be put in main loop or gui always show

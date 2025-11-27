@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from imgui_bundle import imgui
+from imgui_bundle import icons_fontawesome_6, imgui
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import fontManager
 
@@ -85,8 +85,9 @@ class _FontFamilyManager:
 
             imgui.end_table()
 
-        if imgui.button("Apply"):
+        if imgui.button(f"Apply {icons_fontawesome_6.ICON_FA_ROCKET}", [-1, 0]):
             self.apply()
+
         return
 
     def reset_by_rcParams(self) -> None:
