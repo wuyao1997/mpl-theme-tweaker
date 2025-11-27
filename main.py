@@ -101,6 +101,7 @@ class Application:
         iwp = self.params.imgui_window_params
         iwp.menu_app_title = "File"
         iwp.show_status_bar = True
+        iwp.show_status_fps = False
 
         iwp.show_menu_bar = True
         iwp.show_menu_app = False
@@ -115,7 +116,7 @@ class Application:
     def _setup_callbacks(self) -> None:
         cb = self.params.callbacks
         cb.load_additional_fonts = load_fonts
-        cb.show_status = lambda: imgui.text("CopyRight pplotter.com @ 2025")
+        cb.show_status = lambda: imgui.text("© 2025 pplotter.com. All rights reserved.")
         cb.show_menus = self.show_menu_gui
         cb.show_app_menu_items = self.params_window.gui_app_menu
         cb.post_init = self._init
@@ -127,10 +128,14 @@ class Application:
         set_window_icon()
 
         app_settings_str = hello_imgui.load_user_pref("MplThemeTweakerSettings")
+        app_settings = {}
         if app_settings_str:
-            app_settings = json.loads(app_settings_str)
-            if isinstance(app_settings, dict):
-                self.params_window.load_app_settings(app_settings)
+            try:
+                app_settings = json.loads(app_settings_str)
+            except json.JSONDecodeError:
+                app_settings = {}
+
+        self.params_window.load_app_settings(app_settings)
         return
 
     def _exit(self) -> None:

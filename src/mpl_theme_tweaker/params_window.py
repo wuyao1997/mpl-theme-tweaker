@@ -393,6 +393,8 @@ class ParamsWindow:
             style_str = self.get_style_str()
             imgui.set_clipboard_text(style_str)
 
+        imgui.separator()
+        imgui.menu_item(f"{icons_fontawesome_6.ICON_FA_FONT} Cache Font", "", False)
         # shortcut must be put in main loop or gui always show
         # if imgui.is_key_chord_pressed(imgui.Key.mod_ctrl | imgui.Key.s):
         #     print("Ctrl + S pressed")
