@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from imgui_bundle import icons_fontawesome_6, imgui
+from imgui_bundle import icons_fontawesome_6, imgui, imgui_toggle
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import fontManager
 
@@ -21,6 +21,13 @@ from mpl_theme_tweaker._global import get_app_key
 
 _TABLE_FLAGS = imgui.TableFlags_.borders + imgui.TableFlags_.resizable
 _FONT_NAMES = ["None"] + sorted(set(fontManager.get_font_names()))
+_TITLE_FONT_ = None
+
+
+def _title(title: str) -> None:
+    imgui.push_font(_TITLE_FONT_, _TITLE_FONT_.legacy_size)  # type: ignore
+    imgui.separator_text(title)
+    imgui.pop_font()
 
 
 @dataclass
@@ -124,7 +131,39 @@ class ParamsWindow:
         self.reset_by_default(call_callback=False)
 
     def gui(self) -> None:
+        global _TITLE_FONT_
+        if _TITLE_FONT_ is None:
+            _TITLE_FONT_ = get_app_key("title_font")
+
         if imgui.begin_tab_bar("RcParams"):
+            if imgui.begin_tab_item("Preferences")[0]:
+                _title("Style Name")
+                imgui.input_text_with_hint("Style Name", "Style name", "")
+
+                _title("Duplicate name policy")
+                imgui.radio_button("Ovewrite", False)
+                imgui.same_line()
+                imgui.radio_button("Numeric suffix", True)
+
+                _title("Default Directory")
+                imgui.input_text_with_hint(
+                    "Download", "C:\\Users\\username\\Downloads", ""
+                )
+                imgui.input_text_with_hint(
+                    "Custom Style",
+                    "C:\\Users\\username\\Documents\\matplotlib\\style",
+                    "",
+                )
+                imgui.input_text_with_hint(
+                    "Target",
+                    "C:\\Users\\username\\Desktop\\workspace",
+                    "",
+                )
+                toggle_config = imgui_toggle.ios_style(size_scale=0.2)
+                imgui_toggle.toggle("Download to Target", True, config=toggle_config)
+
+                imgui.end_tab_item()
+
             for section in self.sections:
                 if imgui.begin_tab_item(section.get_name())[0]:
                     section.gui()
