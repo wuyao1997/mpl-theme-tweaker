@@ -2,11 +2,12 @@ import os
 import platform
 from dataclasses import dataclass, field
 from pathlib import Path
+import threading
 from typing import Any, Callable, Literal
 
 from imgui_bundle import icons_fontawesome_6, imgui, imgui_toggle  # type: ignore
 import matplotlib.pyplot as plt
-from matplotlib.font_manager import fontManager
+from matplotlib.font_manager import fontManager, _load_fontmanager  # type: ignore
 
 from mpl_theme_tweaker.app_utils import get_downloads_folder
 from mpl_theme_tweaker.mpl_entry.section import (
@@ -92,6 +93,10 @@ def _title(title: str) -> None:
     imgui.push_font(_TITLE_FONT_, _TITLE_FONT_.legacy_size)  # type: ignore
     imgui.separator_text(title)
     imgui.pop_font()
+
+
+def _recache_font() -> None:
+    _load_fontmanager(try_read_cache=False)
 
 
 @dataclass
@@ -394,7 +399,12 @@ class ParamsWindow:
             imgui.set_clipboard_text(style_str)
 
         imgui.separator()
-        imgui.menu_item(f"{icons_fontawesome_6.ICON_FA_FONT} Cache Font", "", False)
+        # ================== Recache Font ==================
+        recache_font_clicked, _ = imgui.menu_item(
+            f"{icons_fontawesome_6.ICON_FA_FONT} Recache Font", "", False
+        )
+        if recache_font_clicked:
+            threading.Thread(target=_recache_font, daemon=True).start()
         # shortcut must be put in main loop or gui always show
         # if imgui.is_key_chord_pressed(imgui.Key.mod_ctrl | imgui.Key.s):
         #     print("Ctrl + S pressed")
