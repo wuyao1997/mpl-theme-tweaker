@@ -3,7 +3,7 @@ from typing import Any
 
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
-from imgui_bundle import imgui, imgui_toggle  # type: ignore
+from imgui_bundle import hello_imgui, imgui, imgui_toggle  # type: ignore
 
 from mpl_theme_tweaker._global import get_app_key
 
@@ -23,8 +23,6 @@ class Entry(ABC):
     def gui(self) -> None:
         if self.sameline:
             imgui.same_line()
-
-        # print(self)
         return
 
     def update_mpl_rcparams(self, value) -> None:
@@ -349,7 +347,10 @@ class ColorEntry(Entry):
         try:
             rgba = mcolors.to_rgba(value)
         except ValueError:
-            print(f"Invalid color value for {self.key}: {value}, use white instead.")
+            hello_imgui.log(
+                hello_imgui.LogLevel.info,
+                f"Invalid color value for {self.key}: {value}, use white instead.",
+            )
             rgba = [1.0, 1.0, 1.0, 1.0]
             return
 

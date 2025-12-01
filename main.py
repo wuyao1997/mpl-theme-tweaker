@@ -60,7 +60,13 @@ class Application:
             rc_window.dock_space_name = "MainDockSpace"
             rc_window.gui_function = self.params_window.gui
 
-            return [figure_window, rc_window]
+            # log window
+            logs_window = hello_imgui.DockableWindow()
+            logs_window.label = "Logs"
+            logs_window.dock_space_name = "FigureSpace"
+            logs_window.gui_function = hello_imgui.log_gui
+
+            return [figure_window, rc_window, logs_window]
 
         iwp = self.params.imgui_window_params
         iwp.default_imgui_window_type = (

@@ -5,8 +5,10 @@ from pathlib import Path
 import threading
 from typing import Any, Callable, Literal
 
-from imgui_bundle import icons_fontawesome_6, imgui, imgui_toggle  # type: ignore
+from cycler import cycler
+from imgui_bundle import hello_imgui, icons_fontawesome_6, imgui, imgui_toggle  # type: ignore
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 from matplotlib.font_manager import fontManager, _load_fontmanager  # type: ignore
 
 from mpl_theme_tweaker.app_utils import get_downloads_folder
@@ -26,6 +28,7 @@ from mpl_theme_tweaker._global import get_app_key
 _TABLE_FLAGS = imgui.TableFlags_.borders + imgui.TableFlags_.resizable
 _FONT_NAMES = ["None"] + sorted(set(fontManager.get_font_names()))
 _TITLE_FONT_ = None
+_STATIC = {}
 
 
 def is_valid_filename(filename: str) -> bool:
@@ -189,6 +192,28 @@ class Preferences:
             self.download_to_target,
             config=toggle_config,
         )
+
+        _title("Experimental Features(No Use Yet)")
+        if "color" not in _STATIC:
+            _STATIC["color"] = ""
+        if imgui.begin_combo("Color", _STATIC["color"]):
+            changed, value = imgui.selectable("##C0", False)
+            imgui.same_line()
+            imgui.color_button("Color", [1, 0, 0, 1])
+            imgui.same_line()
+            imgui.text("C1")
+            if changed and value:
+                _STATIC["color"] = "C1"
+
+            changed, value = imgui.selectable("##C1", False)
+            imgui.same_line()
+            imgui.color_button("Color", [1, 1, 0, 1])
+            imgui.same_line()
+            imgui.text("C2")
+            if changed and value:
+                _STATIC["color"] = "C2"
+            # imgui.selectable("Font Family", False)
+            imgui.end_combo()
         return
 
 
@@ -263,7 +288,7 @@ class _FontFamilyManager:
         for family_name in self.family_names:
             font_names = plt.rcParams[f"font.{family_name}"]
             row = 0
-            for i, font_name in enumerate(font_names):
+            for _, font_name in enumerate(font_names):
                 if row >= self.N:
                     break
                 if font_name in _FONT_NAMES:
@@ -274,10 +299,70 @@ class _FontFamilyManager:
         return
 
 
+class _ColorCycleManager:
+    def __init__(self):
+        self.N = 10
+        self.colors: list[list[float]] = [[1.0, 1.0, 1.0, 1.0]] * self.N
+
+    def gui(self) -> None:
+        if imgui.begin_table("Color", 2, _TABLE_FLAGS):
+            imgui.table_headers_row()
+            title_font = get_app_key("title_font")
+            imgui.push_font(title_font, title_font.legacy_size)
+            imgui.table_set_column_index(0)
+            imgui.text("Index")
+            imgui.table_set_column_index(1)
+            imgui.text("Color")
+            imgui.pop_font()
+
+            for i in range(self.N):
+                imgui.table_next_row()
+
+                imgui.table_set_column_index(0)
+                imgui.text(f"C{i}")
+
+                imgui.table_set_column_index(1)
+                changed, new_color = imgui.color_edit4(
+                    f"##color_{i}",
+                    self.colors[i],
+                    imgui.ColorEditFlags_.default_options_,
+                )
+                if changed:
+                    self.colors[i] = list(new_color)
+
+            imgui.end_table()
+        if imgui.button(f"Apply {icons_fontawesome_6.ICON_FA_ROCKET}##1", [-1, 0]):
+            self.apply()
+        return
+
+    def apply(self) -> None:
+        color_hex = [mcolors.to_hex(color, keep_alpha=True) for color in self.colors]  # type: ignore
+        color_cycler = cycler(color=color_hex)
+        plt.rcParams["axes.prop_cycle"] = color_cycler
+
+        replot_func = get_app_key("FigureWidow.replot_func")
+        if replot_func is not None:
+            replot_func()
+        return
+
+    def reset_by_rcParams(self) -> None:
+        cycler = plt.rcParams["axes.prop_cycle"]
+        if "color" not in cycler.by_key():
+            return
+
+        colors = cycler.by_key()["color"]
+        for i, color in enumerate(colors):
+            if i >= self.N:
+                break
+            self.colors[i] = list(mcolors.to_rgba(color))
+        return
+
+
 class ParamsWindow:
     def __init__(self, callback: Callable):
         self.callback: Callable = callback
         self.font_family_manager = _FontFamilyManager()
+        self.color_cycle_manager = _ColorCycleManager()
         self.preferences = Preferences()
 
         self.sections: list[Section] = [
@@ -304,8 +389,11 @@ class ParamsWindow:
                     section.gui()
                     imgui.end_tab_item()
 
-            if imgui.begin_tab_item("Font")[0]:
+            if imgui.begin_tab_item("List")[0]:
+                _title("Font")
                 self.font_family_manager.gui()
+                _title("Color")
+                self.color_cycle_manager.gui()
                 imgui.end_tab_item()
             imgui.end_tab_bar()
 
@@ -325,6 +413,7 @@ class ParamsWindow:
             section.reset_by_rcParams()
 
         self.font_family_manager.reset_by_rcParams()
+        self.color_cycle_manager.reset_by_rcParams()
 
         if call_callback:
             self.callback()
@@ -341,8 +430,8 @@ class ParamsWindow:
         self.reset_by_rcParams()
         return
 
-    def save2matlotlibrc(self, filepath: str) -> None:
-        print("# Not Implemented Yet")
+    def save2matplotlibrc(self, filepath: str) -> None:
+        hello_imgui.log(hello_imgui.LogLevel.info, "# Not Implemented Yet")
         return
 
     def get_style_str(self) -> str:
@@ -370,7 +459,10 @@ class ParamsWindow:
             filepath = self.preferences.get_write_path()
             directory = filepath.parent
             if not directory.exists():
-                print(f"Downloads folder ``{directory}`` does not exist")
+                hello_imgui.log(
+                    hello_imgui.LogLevel.info,
+                    f"Downloads folder ``{directory}`` does not exist",
+                )
                 return
 
             if (
@@ -388,7 +480,7 @@ class ParamsWindow:
                     n += 1
             style_str = self.get_style_str()
             filepath.write_text(style_str)
-            print(f"Style saved to ``{filepath}``")
+            hello_imgui.log(hello_imgui.LogLevel.info, f"Style saved to ``{filepath}``")
 
         # ================ Copy to Clipboard ================
         copy_clicked, _ = imgui.menu_item(

@@ -1,4 +1,4 @@
-from imgui_bundle import imgui, implot
+from imgui_bundle import hello_imgui, imgui, implot  # type: ignore
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from PIL.Image import Image
@@ -38,7 +38,7 @@ class FigureWindow:
 
     def replot(self) -> None:
         self.replot_times += 1
-        print(f"replot {self.replot_times}")
+        hello_imgui.log(hello_imgui.LogLevel.info, f"replot {self.replot_times}")
 
         if self.figure:
             plt.close(self.figure)
@@ -46,7 +46,7 @@ class FigureWindow:
         try:
             self.figure = plot_figure()
         except Exception as e:
-            print(f"Error: {str(e)}")
+            hello_imgui.log(hello_imgui.LogLevel.error, f"Error: {str(e)}")
             self.figure = None  # type: ignore
             return
 
