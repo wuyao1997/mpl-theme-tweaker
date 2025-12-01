@@ -241,15 +241,15 @@ class _FontFamilyManager:
         for family in self.family_names:
             self.fonts[family] = [_Font() for _ in range(self.N)]
 
-    def apply(self) -> None:
-        for key, fonts in self.fonts.items():
-            font_names = [font.name for font in fonts if font.name != "None"]
-            plt.rcParams[f"font.{key}"] = font_names
+    def to_str(self) -> str:
+        texts = ["## Font"]
+        for family_name, fonts in self.fonts.items():
+            font_family_name = f"font.{family_name}:"
+            text = f"{font_family_name:<18} "
+            text += ", ".join([font.name for font in fonts if font.name != "None"])
+            texts.append(text)
 
-        replot_func = get_app_key("FigureWidow.replot_func")
-        if replot_func is not None:
-            replot_func()
-        return
+        return "\n".join(texts)
 
     def gui(self) -> None:
         if imgui.begin_table("Font", 5, _TABLE_FLAGS):
@@ -284,6 +284,16 @@ class _FontFamilyManager:
 
         return
 
+    def apply(self) -> None:
+        for key, fonts in self.fonts.items():
+            font_names = [font.name for font in fonts if font.name != "None"]
+            plt.rcParams[f"font.{key}"] = font_names
+
+        replot_func = get_app_key("FigureWidow.replot_func")
+        if replot_func is not None:
+            replot_func()
+        return
+
     def reset_by_rcParams(self) -> None:
         for family_name in self.family_names:
             font_names = plt.rcParams[f"font.{family_name}"]
@@ -303,6 +313,11 @@ class _ColorCycleManager:
     def __init__(self):
         self.N = 10
         self.colors: list[list[float]] = [[1.0, 1.0, 1.0, 1.0]] * self.N
+
+    def to_str(self) -> str:
+        color_hex = [mcolors.to_hex(color, keep_alpha=True) for color in self.colors]  # type: ignore
+        color_cycler = cycler(color=color_hex)
+        return f"## Color Cycle\naxes.prop_cycle:{str(color_cycler)}"
 
     def gui(self) -> None:
         if imgui.begin_table("Color", 2, _TABLE_FLAGS):
@@ -438,6 +453,9 @@ class ParamsWindow:
         text = "## written by mpl-theme-tweaker, version 0.1.0\n"
         for section in self.sections:
             text += section.to_str() + "\n\n"
+
+        text += "\n\n" + self.font_family_manager.to_str()
+        text += "\n\n" + self.color_cycle_manager.to_str()
         return text
 
     def gui_app_menu(self) -> None:
@@ -460,7 +478,7 @@ class ParamsWindow:
             directory = filepath.parent
             if not directory.exists():
                 hello_imgui.log(
-                    hello_imgui.LogLevel.info,
+                    hello_imgui.LogLevel.error,
                     f"Downloads folder ``{directory}`` does not exist",
                 )
                 return
