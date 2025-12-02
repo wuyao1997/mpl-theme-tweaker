@@ -9,3 +9,6 @@ dependencies = [
     "matplotlib>=3.10.7",
     "pyinstaller>=6.16.0",
 ]
+
+[project.scripts]
+mpl-theme-tweaker = "mpl_theme_tweaker.main:main"
