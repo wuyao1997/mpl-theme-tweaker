@@ -29,7 +29,6 @@ from mpl_theme_tweaker._global import assetsPath, get_app_key
 _TABLE_FLAGS = imgui.TableFlags_.borders + imgui.TableFlags_.resizable
 _FONT_NAMES = ["None"] + sorted(set(fontManager.get_font_names()))
 _TITLE_FONT_ = None
-_STATIC = {}
 
 
 def is_valid_filename(filename: str) -> bool:
@@ -111,18 +110,6 @@ class Preferences:
     custom_style_directory: str = ""
     target_directory: str = ""
     download_to_target: bool = False
-
-    def __post_init__(self) -> None:
-        marker_dir = assetsPath() / "marker"
-        marker_name = [p.stem for p in marker_dir.glob("*.png")]
-        marker_img_paths = [marker_dir / f"{name}.png" for name in marker_name]
-        marker_images = load_images(marker_img_paths)
-        marker_options = [
-            ImageComboOption(img, name, name)
-            for name, img in zip(marker_name, marker_images)
-        ]
-
-        self.image_combo = ImageCombo(marker_options)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -206,29 +193,7 @@ class Preferences:
             config=toggle_config,
         )
 
-        _title("Experimental Features(No Use Yet)")
-        if "color" not in _STATIC:
-            _STATIC["color"] = ""
-        if imgui.begin_combo("Color", _STATIC["color"]):
-            changed, value = imgui.selectable("##C0", False)
-            imgui.same_line()
-            imgui.color_button("Color", [1, 0, 0, 1])
-            imgui.same_line()
-            imgui.text("C1")
-            if changed and value:
-                _STATIC["color"] = "C1"
-
-            changed, value = imgui.selectable("##C1", False)
-            imgui.same_line()
-            imgui.color_button("Color", [1, 1, 0, 1])
-            imgui.same_line()
-            imgui.text("C2")
-            if changed and value:
-                _STATIC["color"] = "C2"
-
-            imgui.end_combo()
-
-        self.image_combo.gui("Marker")
+        # _title("Experimental Features(No Use Yet)")
 
         return
 

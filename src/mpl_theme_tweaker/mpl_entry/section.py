@@ -7,6 +7,7 @@ from mpl_theme_tweaker.mpl_entry.mpl_entry import (
     FloatEntry,
     Float2Entry,
     IntEntry,
+    MarkerStyleEntry,
     SeparatorEntry,
     StrEntry,
 )
@@ -690,31 +691,7 @@ class LinesSection(Section):
         markeredgecolor = ColorEntry(
             "edge color", "lines.markeredgecolor", sameline=True
         )
-        marker = StrEntry(
-            "marker",
-            "lines.marker",
-            {
-                "value": 0,
-                "items": [
-                    "o",
-                    ".",
-                    "^",
-                    "v",
-                    "<",
-                    ">",
-                    "8",
-                    "s",
-                    "p",
-                    "P",
-                    "*",
-                    "h",
-                    "H",
-                    "X",
-                    "D",
-                    "d",
-                ],
-            },
-        )
+        marker = MarkerStyleEntry("marker", "lines.marker")
 
         markeredgewidth = FloatEntry(
             "marker edge width",

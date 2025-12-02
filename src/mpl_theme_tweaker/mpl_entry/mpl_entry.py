@@ -5,7 +5,8 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 from imgui_bundle import hello_imgui, imgui, imgui_toggle  # type: ignore
 
-from mpl_theme_tweaker._global import get_app_key
+from mpl_theme_tweaker._global import assetsPath, get_app_key
+from mpl_theme_tweaker.image_combo import ImageCombo, ImageComboOption, load_images
 
 
 class Entry(ABC):
@@ -291,6 +292,94 @@ class StrEntry(Entry):
 
     def to_str(self) -> str:
         return f'{self.key}: "{self.items[self.value]}"'
+
+
+class MarkerStyleEntry(Entry):
+    """
+    dict info should like:
+    {
+        "value": 0,
+        "items": ["AA", "BB", "CC", "DD"],
+    }
+    """
+
+    def __init__(self, label: str, key: str):
+        super().__init__(label, key)
+        self.value = "none"
+
+        marker_dir = assetsPath() / "marker"
+        marker: dict[str, str] = {
+            "none": "none",
+            "point": ".",
+            "circle": "o",
+            "triangle_up": "^",
+            "triangle_down": "v",
+            "triangle_right": ">",
+            "triangle_left": "<",
+            "octagon": "8",
+            "square": "s",
+            "pentagon": "p",
+            "plus": "P",
+            "star": "*",
+            "hexagon1": "h",
+            "hexagon2": "H",
+            "x": "X",
+            "diamond": "D",
+            "thin_diamond": "d",
+            "pixel": ",",
+            "plus_unfilled": "+",
+            "x_unfilled": "x",
+            "tri_down": "1",
+            "tri_up": "2",
+            "tri_left": "3",
+            "tri_right": "4",
+            "vline": "|",
+            "hline": "_",
+        }
+        marker_names = list(marker.keys())
+        marker_values = list(marker.values())
+        marker_labels = [f"{key} ('{value}')" for key, value in marker.items()]
+        marker_img_paths = [marker_dir / f"{name}.png" for name in marker_names]
+
+        marker_images = load_images(marker_img_paths)
+        marker_options = [
+            ImageComboOption(img, label, value)
+            for img, label, value in zip(marker_images, marker_labels, marker_values)
+        ]
+
+        self.image_combo = ImageCombo(marker_options)
+
+    def gui(self) -> None:
+        super().gui()
+
+        state_changed = self.image_combo.gui("Marker")
+        if state_changed:
+            new_value = self.image_combo.get_value()
+            if new_value != self.value:
+                self.update_mpl_rcparams(new_value)
+        return
+
+    def update_mpl_rcparams(self, value) -> None:
+        self.value = value
+        plt.rcParams[self.key] = value
+
+        self.updated = True
+        return
+
+    def reset_by_rcParams(self) -> None:
+        value = plt.rcParams[self.key]
+
+        if value in self.image_combo.values:
+            self.value = value
+            idx = self.image_combo.values.index(value)
+            self.image_combo.set_index(idx)
+        else:
+            self.image_combo.set_index(None)
+
+        return
+
+    def to_str(self) -> str:
+        return f'{self.key}: "{self.value}"'
 
 
 class ColorEntry(Entry):

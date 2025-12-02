@@ -67,6 +67,10 @@ class ImageCombo:
 
         return cls(options, preview_label, preview_value)
 
+    def set_index(self, index: int | None) -> None:
+        self.index = index
+        return
+
     def get_value(self) -> Any | None:
         if self.index is None:
             return self.preview_value
@@ -77,7 +81,7 @@ class ImageCombo:
             return self.preview_label
         return self.labels[self.index]
 
-    def gui(self, combo_label: str) -> None:
+    def gui(self, combo_label: str) -> bool:
         if not hasattr(self, "texture_refs"):
             self.texture_refs = []
             for image in self.images:
@@ -85,6 +89,7 @@ class ImageCombo:
                 texture_ref = imgui.ImTextureRef(texture_id)
                 self.texture_refs.append(texture_ref)
 
+        state_changed = False
         if imgui.begin_combo(combo_label, self.get_label()):
             for i, (label, texture_ref) in enumerate(
                 zip(self.labels, self.texture_refs)
@@ -94,7 +99,9 @@ class ImageCombo:
                 imgui.image(texture_ref, (32, 32))
                 imgui.same_line()
                 imgui.text(label)
+
                 if changed and value:
                     self.index = i
+                    state_changed = True
             imgui.end_combo()
-        return
+        return state_changed
