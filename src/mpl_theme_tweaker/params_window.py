@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.font_manager import fontManager, _load_fontmanager  # type: ignore
 
-from mpl_theme_tweaker.app_utils import get_downloads_folder
+from mpl_theme_tweaker.app_utils import get_downloads_folder, create_marker_texture
 from mpl_theme_tweaker.mpl_entry.section import (
     Section,
     AxesSection,
@@ -193,6 +193,13 @@ class Preferences:
             config=toggle_config,
         )
 
+        if not hasattr(self, "marker_texture_ids"):
+            self.marker_texture_ids = create_marker_texture()
+            self.marker_texture_refs = [
+                imgui.ImTextureRef(tex_id=texture_id)
+                for texture_id in self.marker_texture_ids
+            ]
+
         _title("Experimental Features(No Use Yet)")
         if "color" not in _STATIC:
             _STATIC["color"] = ""
@@ -212,8 +219,17 @@ class Preferences:
             imgui.text("C2")
             if changed and value:
                 _STATIC["color"] = "C2"
-            # imgui.selectable("Font Family", False)
+
+            changed, value = imgui.selectable("##C3", False)
+            imgui.same_line()
+            imgui.image(self.marker_texture_refs[0], [32, 32])
+            imgui.same_line()
+            imgui.text("C3")
+            if changed and value:
+                _STATIC["color"] = "C3"
+
             imgui.end_combo()
+
         return
 
 

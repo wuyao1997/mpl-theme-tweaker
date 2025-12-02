@@ -7,6 +7,7 @@ from PIL import Image
 
 
 from mpl_theme_tweaker._global import assetsPath, set_app_key
+from mpl_theme_tweaker.opengl import create_texture_from_image
 
 glfw.init()
 
@@ -61,6 +62,14 @@ def get_downloads_folder() -> Path:
             return Path.home() / "Downloads"
     else:  # macOS 和 Linux
         return Path.home() / "Downloads"
+
+
+def create_marker_texture() -> list[int]:
+    img_dir = assetsPath() / "marker"
+
+    img = Image.open(img_dir / "plus.png").convert("RGBA")
+    texture_id = create_texture_from_image(img)
+    return [texture_id]
 
 
 if __name__ == "__main__":
