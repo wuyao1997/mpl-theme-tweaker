@@ -7,7 +7,6 @@ from PIL import Image
 
 
 from mpl_theme_tweaker._global import assetsPath, set_app_key
-from mpl_theme_tweaker.opengl import create_texture_from_image
 
 glfw.init()
 

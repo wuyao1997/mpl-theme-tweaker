@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.font_manager import fontManager, _load_fontmanager  # type: ignore
 
-from mpl_theme_tweaker.app_utils import get_downloads_folder, create_marker_texture
+from mpl_theme_tweaker.app_utils import get_downloads_folder
 from mpl_theme_tweaker.image_combo import ImageCombo, ImageComboOption, load_images
 from mpl_theme_tweaker.mpl_entry.section import (
     Section,
