@@ -14,6 +14,7 @@ from mpl_theme_tweaker._global import set_app_key
 
 class FigureWindow:
     def __init__(self):
+        plt.style.use("default")
         self.figure: Figure = plot_figure()
         self.image: Image = Figure2Image(self.figure)
         self.texture_id: int = None  # type: ignore
