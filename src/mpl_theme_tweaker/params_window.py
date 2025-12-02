@@ -109,6 +109,7 @@ class Preferences:
     custom_style_directory: str = ""
     target_directory: str = ""
     download_to_target: bool = False
+    reset_default_before_apply_new: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -118,6 +119,7 @@ class Preferences:
             "custom_style_directory": self.custom_style_directory,
             "target_directory": self.target_directory,
             "download_to_target": self.download_to_target,
+            "reset_default_before_apply_new": self.reset_default_before_apply_new,
         }
 
     def from_dict(self, data: dict[str, Any]) -> None:
@@ -137,6 +139,9 @@ class Preferences:
         self.custom_style_directory = data.get("custom_style_directory", "")
         self.target_directory = data.get("target_directory", "")
         self.download_to_target = bool(data.get("download_to_target", False))
+        self.reset_default_before_apply_new = bool(
+            data.get("reset_default_before_apply_new", False)
+        )
 
         return
 
@@ -193,6 +198,12 @@ class Preferences:
         )
 
         # _title("Experimental Features(No Use Yet)")
+        toggle_config = imgui_toggle.ios_style(size_scale=0.2)
+        _, self.reset_default_before_apply_new = imgui_toggle.toggle(
+            "Reset Default Before Apply New Style",
+            self.reset_default_before_apply_new,
+            config=toggle_config,
+        )
 
         return
 
@@ -420,7 +431,8 @@ class ParamsWindow:
         return
 
     def reset_by_style(self, style_name: str) -> None:
-        plt.style.use("default")
+        if self.preferences.reset_default_before_apply_new:
+            plt.style.use("default")
         plt.style.use(style_name)
         self.reset_by_rcParams()
         return
@@ -439,16 +451,16 @@ class ParamsWindow:
         return text
 
     def gui_app_menu(self) -> None:
-        imgui.menu_item(f"{icons_fontawesome_6.ICON_FA_FILE} Open", "", False)
+        imgui.menu_item(f"{icons_fontawesome_6.ICON_FA_FILE} Load", "", False)
         imgui.separator()
         # ======================== Save =====================
-        save_clicked, _ = imgui.menu_item(
-            f"{icons_fontawesome_6.ICON_FA_FLOPPY_DISK} Save", "", False
-        )
-        # ====================== Save As ====================
-        saveas_clicked, _ = imgui.menu_item(
-            f"{icons_fontawesome_6.ICON_FA_FILE_EXPORT} Save As", "", False
-        )
+        # save_clicked, _ = imgui.menu_item(
+        #     f"{icons_fontawesome_6.ICON_FA_FLOPPY_DISK} Save", "", False
+        # )
+        # # ====================== Save As ====================
+        # saveas_clicked, _ = imgui.menu_item(
+        #     f"{icons_fontawesome_6.ICON_FA_FILE_EXPORT} Save As", "", False
+        # )
         # ===================== Download ====================
         download_clicked, _ = imgui.menu_item(
             f"{icons_fontawesome_6.ICON_FA_FILE_ARROW_DOWN} Download", "", False

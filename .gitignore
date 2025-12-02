@@ -3,6 +3,9 @@
 **/.*
 **/.*/
 
+# Shutcut file in Windows
+*.lnk
+
 # font
 *.ttf
 *.otf

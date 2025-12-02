@@ -4,11 +4,14 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
-    "imgui-bundle>=1.92.4",
-    "matplotlib>=3.10.7",
-    "pyinstaller>=6.16.0",
-]
+dependencies = ["imgui-bundle>=1.92.4", "matplotlib>=3.10.7"]
 
 [project.scripts]
 mpl-theme-tweaker = "mpl_theme_tweaker.main:main"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = ["pyinstaller>=6.16.0", "setuptools>=80.9.0", "wheel>=0.45.1"]
