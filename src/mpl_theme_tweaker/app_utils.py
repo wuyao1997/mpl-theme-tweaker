@@ -64,13 +64,5 @@ def get_downloads_folder() -> Path:
         return Path.home() / "Downloads"
 
 
-def create_marker_texture() -> list[int]:
-    img_dir = assetsPath() / "marker"
-
-    img = Image.open(img_dir / "plus.png").convert("RGBA")
-    texture_id = create_texture_from_image(img)
-    return [texture_id]
-
-
 if __name__ == "__main__":
     print(get_downloads_folder())

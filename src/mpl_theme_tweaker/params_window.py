@@ -12,6 +12,7 @@ import matplotlib.colors as mcolors
 from matplotlib.font_manager import fontManager, _load_fontmanager  # type: ignore
 
 from mpl_theme_tweaker.app_utils import get_downloads_folder, create_marker_texture
+from mpl_theme_tweaker.image_combo import ImageCombo, ImageComboOption, load_images
 from mpl_theme_tweaker.mpl_entry.section import (
     Section,
     AxesSection,
@@ -23,7 +24,7 @@ from mpl_theme_tweaker.mpl_entry.section import (
     LegendSection,
     LinesSection,
 )
-from mpl_theme_tweaker._global import get_app_key
+from mpl_theme_tweaker._global import assetsPath, get_app_key
 
 _TABLE_FLAGS = imgui.TableFlags_.borders + imgui.TableFlags_.resizable
 _FONT_NAMES = ["None"] + sorted(set(fontManager.get_font_names()))
@@ -111,6 +112,18 @@ class Preferences:
     target_directory: str = ""
     download_to_target: bool = False
 
+    def __post_init__(self) -> None:
+        marker_dir = assetsPath() / "marker"
+        marker_name = [p.stem for p in marker_dir.glob("*.png")]
+        marker_img_paths = [marker_dir / f"{name}.png" for name in marker_name]
+        marker_images = load_images(marker_img_paths)
+        marker_options = [
+            ImageComboOption(img, name, name)
+            for name, img in zip(marker_name, marker_images)
+        ]
+
+        self.image_combo = ImageCombo(marker_options)
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "style_name": self.style_name,
@@ -193,13 +206,6 @@ class Preferences:
             config=toggle_config,
         )
 
-        if not hasattr(self, "marker_texture_ids"):
-            self.marker_texture_ids = create_marker_texture()
-            self.marker_texture_refs = [
-                imgui.ImTextureRef(tex_id=texture_id)
-                for texture_id in self.marker_texture_ids
-            ]
-
         _title("Experimental Features(No Use Yet)")
         if "color" not in _STATIC:
             _STATIC["color"] = ""
@@ -220,15 +226,9 @@ class Preferences:
             if changed and value:
                 _STATIC["color"] = "C2"
 
-            changed, value = imgui.selectable("##C3", False)
-            imgui.same_line()
-            imgui.image(self.marker_texture_refs[0], [32, 32])
-            imgui.same_line()
-            imgui.text("C3")
-            if changed and value:
-                _STATIC["color"] = "C3"
-
             imgui.end_combo()
+
+        self.image_combo.gui("Marker")
 
         return
 
