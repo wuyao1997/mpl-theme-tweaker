@@ -23,7 +23,7 @@ from mpl_theme_tweaker.mpl_entry.section import (
     LegendSection,
     LinesSection,
 )
-from mpl_theme_tweaker._global import get_app_key
+from mpl_theme_tweaker._global import get_app_key, set_app_key
 
 _TABLE_FLAGS = imgui.TableFlags_.borders + imgui.TableFlags_.resizable
 _FONT_NAMES = ["None"] + sorted(set(fontManager.get_font_names()))
@@ -383,6 +383,7 @@ class ParamsWindow:
         ]
 
         self.reset_by_default(call_callback=False)
+        set_app_key("ParamsWindow.reset_by_rcParams", self.reset_by_rcParams)
 
     def gui(self) -> None:
         if imgui.begin_tab_bar("RcParams"):

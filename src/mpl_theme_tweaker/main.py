@@ -7,12 +7,16 @@ from mpl_theme_tweaker.app_utils import setup_theme, set_window_icon, load_fonts
 from mpl_theme_tweaker.figure_window import FigureWindow
 from mpl_theme_tweaker.params_window import ParamsWindow
 from mpl_theme_tweaker._global import assetsPath
+from mpl_theme_tweaker.style_manager import StyleManager
 
 
 class Application:
     def __init__(self):
         self.figure_window = FigureWindow()
         self.params_window = ParamsWindow(self.figure_window.replot)
+        self.style_manager = StyleManager()
+        self.style_manager.set_path(r"C:\Users\wuyao\mplstyle")
+
         self.styles = [
             style for style in plt.style.available if not style.startswith("_")
         ]
@@ -170,6 +174,7 @@ class Application:
                         self.params_window.reset_by_style(style)
                 imgui.end_menu()
 
+            self.style_manager.menu_gui()
             imgui.end_menu()
         return
 
