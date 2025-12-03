@@ -180,11 +180,29 @@ class Preferences:
             "C:\\Users\\username\\Downloads",
             self.download_directory,
         )
-        _, self.custom_style_directory = imgui.input_text_with_hint(
+
+        changed, custom_style_directory = imgui.input_text_with_hint(
             "Custom Style",
             "C:\\Users\\username\\Documents\\matplotlib\\style",
-            "",
+            self.custom_style_directory,
         )
+        if changed:
+            if Path(custom_style_directory).is_dir():
+                self.custom_style_directory = custom_style_directory
+                _func = get_app_key("StyleManager.set_path")
+                _func(custom_style_directory)
+                hello_imgui.log(
+                    hello_imgui.LogLevel.info,
+                    f"Custom style directory set to {custom_style_directory}.",
+                )
+            else:
+                hello_imgui.log(
+                    hello_imgui.LogLevel.error,
+                    f"`{custom_style_directory}` is not a directory.",
+                )
+
+            # self.custom_style_directory = custom_style_directory
+
         _, self.target_directory = imgui.input_text_with_hint(
             "Target",
             "C:\\Users\\username\\Desktop\\workspace",

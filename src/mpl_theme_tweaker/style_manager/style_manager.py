@@ -12,32 +12,42 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from imgui_bundle import imgui
 
-from mpl_theme_tweaker._global import get_app_key
+from mpl_theme_tweaker._global import get_app_key, set_app_key
 
 
-def search_mplstyle_files(search_dir: str | Path) -> dict[str, list[str]]:
-    """Search all .mplstyle files in the directory recursively.
+def search_mplstyle_files(
+    search_dir: str | Path, max_files: int = 100
+) -> dict[str, list[str]]:
+    """Search all .mplstyle files in the directory recursively, with file count limit.
 
     Args:
         search_dir (str | Path): The directory to search.
+        max_files (int): Maximum number of files to collect. If exceeded,
+            return the collected files immediately. Defaults to 100.
 
     Returns:
         dict[str, list[str]]: A dict with directory name as key and a list of style file paths as value.
     """
     root_path = Path(search_dir).absolute()
     result: dict[str, list[str]] = {}
+    total_files = 0
+
     for file_path in root_path.rglob("*.mplstyle"):
         if not file_path.is_file():
             continue
 
-        # Get the relative path of the file directory
         file_dir = file_path.parent
         rel_dir = file_dir.relative_to(root_path)
-
         dict_key = "root" if rel_dir == Path(".") else str(rel_dir)
+
         if dict_key not in result:
             result[dict_key] = []
+
         result[dict_key].append(str(file_path.absolute()))
+        total_files += 1
+
+        if total_files >= max_files:
+            break
 
     return result
 
@@ -47,7 +57,7 @@ class StyleManager:
     styles_map: dict[str, list[Path]] = {}
 
     def __init__(self):
-        pass
+        set_app_key("StyleManager.set_path", self.set_path)
 
     def set_path(self, path: Path | str) -> None:
         self.directory = Path(path).absolute()
