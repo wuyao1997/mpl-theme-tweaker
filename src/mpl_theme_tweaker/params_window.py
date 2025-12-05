@@ -470,8 +470,8 @@ class ParamsWindow:
         return text
 
     def gui_app_menu(self) -> None:
-        imgui.menu_item(f"{icons_fontawesome_6.ICON_FA_FILE} Load", "", False)
-        imgui.separator()
+        # imgui.menu_item(f"{icons_fontawesome_6.ICON_FA_FILE} Load", "", False)
+        # imgui.separator()
         # ======================== Save =====================
         # save_clicked, _ = imgui.menu_item(
         #     f"{icons_fontawesome_6.ICON_FA_FLOPPY_DISK} Save", "", False

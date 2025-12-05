@@ -15,7 +15,6 @@ class Application:
         self.figure_window = FigureWindow()
         self.params_window = ParamsWindow(self.figure_window.replot)
         self.style_manager = StyleManager()
-        # self.style_manager.set_path(r"C:\Users\wuyao\mplstyle")
 
         self.styles = [
             style for style in plt.style.available if not style.startswith("_")
